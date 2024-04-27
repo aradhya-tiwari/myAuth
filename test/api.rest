@@ -1,0 +1,13 @@
+GET http://127.0.0.1:8787/
+
+###
+POST  http://127.0.0.1:8787/register
+Content-Type: 'application/json'
+
+{
+    "name":"Aradhya Tiwari",
+    "class":"CS (AI)A"
+    
+    
+    
+}
