@@ -2,18 +2,25 @@ import { Hono } from 'hono'
 import { app as api } from './routes/api'
 import { validateRegister } from './middleware/validateRegister'
 import type { Variables } from './types/honoVars'
-// import { Conte }
+// import * as dotenv from 'dotenv'
+// dotenv.config()
+
+type Bindings = {
+  production: boolean
+}
 
 
-
-const app = new Hono()
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.route('/api', api)
 
 app.get('/', (c) => {
-  console.log(typeof (c))
 
-  return c.text('Hello Hono!')
+  console.log("console.log(console.log())")
+  if (c.env.production === true)
+    return c.text('Hello Hono! Production Server')
+  else
+    return c.text("Hello Hono Dev Server " + c.env.production)
 
 })
 

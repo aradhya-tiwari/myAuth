@@ -1,8 +1,8 @@
 name = "authentication"
 compatibility_date = "2023-12-01"
 
-# [vars]
-# MY_VAR = "my-variable"
+[vars]
+production = true
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"

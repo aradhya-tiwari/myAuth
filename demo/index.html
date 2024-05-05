@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:3000">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self' ">
+    <meta http-equiv="X-Frame-Options" content="ALLOW-FROM https://cw.na1.hgncloud.com">
+
+    <title>New Document</title>
+</head>
+
+<body>
+    <form action="http://127.0.0.1:8787/">
+        <button type="submit">Submit </button>
+    </form>
+</body>
+<script>
+    document.querySelector('button').addEventListener('click', async function (e) {
+        e.preventDefault()
+        let fetchh = await fetch("http://127.0.0.1:8787/")
+        let data = await fetchh.text()
+        console.log(data)
+    })
+</script>
+<style>
+    body {
+        background-color: antiquewhite;
+    }
+</style>
+
+</html>
