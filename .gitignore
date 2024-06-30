@@ -1,9 +1,12 @@
 wrangler.toml
 node_modules
 dist
+.env
+demo
+Client
+_migrations.ts
 .wrangler
 .dev.vars
-.env 
 # Change them to your taste:
 package-lock.json
 yarn.lock

@@ -1,0 +1,1 @@
+for accessing environment variables we have to get them in every route, cant access them globallyy therefore create a class for it 

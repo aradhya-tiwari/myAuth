@@ -1,8 +1,9 @@
 import { Hono } from 'hono'
+import { AuthUser } from '../middleware/auth'
 
 const app = new Hono()
 
-app.get('/', (c) => {
+app.get('/', AuthUser, (c) => {
     return c.text('Hello API!')
 })
 

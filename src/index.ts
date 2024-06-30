@@ -1,36 +1,66 @@
 import { Hono } from 'hono'
 import { app as api } from './routes/api'
 import { validateRegister } from './middleware/validateRegister'
-import type { Variables } from './types/honoVars'
+import { Login } from './controller/login'
+import { InArgs } from '@libsql/client'
+import { signup } from './controller/signup'
+import { Jwt } from 'hono/utils/jwt'
+import { AuthUser } from './middleware/auth'
+import { setCookie } from 'hono/cookie'
+import { getGoogleAccessToken, googleAuth } from './controller/googleOAuth'
 // import * as dotenv from 'dotenv'
 // dotenv.config()
 
 type Bindings = {
   production: boolean
+  DATABASE_URL: string,
+  TURSO_TOKEN: string
 }
 
-
-const app = new Hono<{ Bindings: Bindings }>()
+const app = new Hono<{ Bindings: Bindings }, any>()
 
 app.route('/api', api)
 
-app.get('/', (c) => {
 
-  console.log("console.log(console.log())")
-  if (c.env.production === true)
-    return c.text('Hello Hono! Production Server')
-  else
-    return c.text("Hello Hono Dev Server " + c.env.production)
-
+app.get('/', AuthUser, (c) => {
+  console.log("/route")
+  return c.text("/ route")
 })
+
+
+// Google Auth, For redirecting it to accounts.google and it will redirect to REDIRECT_URI
+app.get('/googleAuth', async (c) => {
+  console.log(googleAuth(c))
+  let uri = new URL(googleAuth(c))
+  return c.redirect(uri.toString())
+})
+
+
+// for getting auth token and setting cookie 
+app.get('/authToken', (c) => {
+  const { code } = c.req.query()
+  getGoogleAccessToken(c, code)
+  return c.json(c.req.queries)
+})
+
 
 // Signup Route 
-
-app.post('/register', validateRegister, async (c) => {
+app.post('/register', async (c) => {
+  // console.log("register Request hit")
   const body = await c.req.json()
-  let resp = c.var.creden
-  return c.json(resp)
-
-
+  const register = await signup(c, body)
+  console.log("Registration Everything Done")
+  return c.text("done")
 })
+
+
+//Login Route
+app.post('/login', async (c) => {
+  const body = await c.req.json()
+  const login = await Login(c, body)
+  return c.json(login)
+})
+
+
+
 export default app
