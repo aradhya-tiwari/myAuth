@@ -30,17 +30,17 @@ app.get('/', AuthUser, (c) => {
 
 // Google Auth, For redirecting it to accounts.google and it will redirect to REDIRECT_URI
 app.get('/googleAuth', async (c) => {
-  console.log(googleAuth(c))
+  // console.log(googleAuth(c))
   let uri = new URL(googleAuth(c))
   return c.redirect(uri.toString())
 })
 
 
 // for getting auth token and setting cookie 
-app.get('/authToken', (c) => {
+app.get('/authToken', async (c) => {
   const { code } = c.req.query()
-  getGoogleAccessToken(c, code)
-  return c.json(c.req.queries)
+  // await getGoogleAccessToken(c, code)
+  return c.json(await getGoogleAccessToken(c, code))
 })
 
 
@@ -58,7 +58,7 @@ app.post('/register', async (c) => {
 app.post('/login', async (c) => {
   const body = await c.req.json()
   const login = await Login(c, body)
-  return c.json(login)
+  return c.json(login || { msg: "error" })
 })
 
 

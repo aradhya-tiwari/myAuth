@@ -1,6 +1,6 @@
 import { Context } from "hono";
-
-
+import { sign } from "hono/jwt";
+import { setCookie } from "hono/cookie";
 
 export function googleAuth(c: Context) {
     const url = `
@@ -9,28 +9,69 @@ export function googleAuth(c: Context) {
     return url
 }
 
+
+
+
 export async function getGoogleAccessToken(c: Context, code: String | undefined) {
-    const AccessTokenUrl = "https://oauth2.googleapis.com/token";
-    const AccessTokenProps: any = {
-        code,
-        client_id: c.env.GOOGLE_CLIENT_ID,
-        client_secret: c.env.GOOGLE_CLIENT_SECRETE,
-        redirect_uri: c.env.REDIRECT_URI,
-        grant_type: "authorization_code"
-    }
 
-    let url = AccessTokenUrl
-
-    for (let i in AccessTokenProps) {
-        url += `${i}=${AccessTokenProps[i]}&`
-    }
-    // console.log(url)
-    let fetchh = await fetch(url, {
-        method: "POST",
-        header: {
-            "Content-Type": "application/x-www-form-urlencoded",
+    try {
+        const AccessCodeUrl = "https://oauth2.googleapis.com/token";
+        const AccessCodeProps: any = {
+            code,
+            client_id: c.env.GOOGLE_CLIENT_ID,
+            client_secret: c.env.GOOGLE_CLIENT_SECRETE,
+            redirect_uri: c.env.REDIRECT_URI,
+            grant_type: "authorization_code"
         }
-    })
+
+
+        let body = ''
+        for (let i in AccessCodeProps) {
+            body += `${i}=${AccessCodeProps[i]}&`
+        }
+
+        let access_token = '', id_token = ''
+
+        let fetchh = await fetch(AccessCodeUrl, {
+            method: "POST",
+            headers: {
+                "Accept": "Application/json",
+                "Content-Type": "Application/json",
+            },
+            body: JSON.stringify(AccessCodeProps)
+        })
+
+        let fetchResp: any = await fetchh.json()
+
+        access_token = fetchResp.access_token
+        id_token = fetchResp.id_token
+        console.log(access_token, id_token)
+
+
+        const userInfoUrl = `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${access_token}`
+
+        fetchh = await fetch(userInfoUrl, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${id_token}`
+            }
+        })
+        fetchResp = await fetchh.json()
+
+        let payload = {
+            id: fetchResp.id,
+            email: fetchResp.email,
+            picture: fetchResp.picture,
+            name: fetchResp.name
+        }
+        let jwt = await sign(payload, c.env.JWT_KEY)
+        setCookie(c, 'authCookie', jwt)
+        return (fetchResp)
+
+    } catch (e) {
+        console.error("problem getting access_token from oauth.google", e)
+    }
+
 }
 
 /**
